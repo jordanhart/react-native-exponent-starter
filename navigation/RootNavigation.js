@@ -2,6 +2,8 @@ import React from 'react';
 import {
   StyleSheet,
   View,
+  AsyncStorage,
+  Alert,
 } from 'react-native';
 import {
   Notifications,
@@ -28,7 +30,21 @@ export default class RootNavigation extends React.Component {
     this._notificationSubscription && this._notificationSubscription.remove();
   }
 
+  try {
+    const value = await AsyncStorage.getItem('@EmployeeHelp:user');
+        if (value !== null){
+    // We have data!!
+        Alert.alert('Logged in!',
+          `Hi ${value}!`);
+  }
+} catch (error) {
+  // Error retrieving data
+  Alert.alert('Error!',
+          `Hi {error}!`);
+}
+  
   render() {
+
     // return (
     //   <TabNavigation
     //     tabBarHeight={56}
