@@ -17,6 +17,7 @@ import {
   FontAwesome,
 } from '@exponent/vector-icons';
 import LogInScreen from '../screens/LogInScreen';
+import SplashScreen from '../screens/SplashScreen';
 import Alerts from '../constants/Alerts';
 import Colors from '../constants/Colors';
 import registerForPushNotificationsAsync from '../api/registerForPushNotificationsAsync';
@@ -25,13 +26,12 @@ export default class RootNavigation extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {splash: true}
   }
   componentDidMount() {
     this._notificationSubscription = this._registerForPushNotifications();
     this.getLogin().then((json) => {
-      Alert.alert('Did mount!',
-        `Hi ${json}!`);
+      this.state.splash = false;
       this.state.login = json;
     }, function(error) {
       Alert.alert('Error!',
@@ -61,6 +61,9 @@ export default class RootNavigation extends React.Component {
  }
 }
   render() {
+    if (this.state.splash) {
+      return (<SplashScreen />);
+    }
     if (this.state.login) {
     return (
       <TabNavigation
