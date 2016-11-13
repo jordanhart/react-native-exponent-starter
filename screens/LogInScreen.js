@@ -1,4 +1,5 @@
 import React from 'react';
+import Exponent from 'exponent';
 import {
   Image,
   Linking,
@@ -8,47 +9,61 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
+  AsyncStorage
 } from 'react-native';
 
 import { MonoText } from '../components/StyledText';
 
-export default class LoginScreen extends React.Component {
+export default class LogInScreen extends React.Component {
   static route = {
     navigationBar: {
       visible: false,
     },
   }
 
-  async function logIn() {
-  const { type, token } = await Exponent.Facebook.logInWithReadPermissionsAsync(
-    '719461758217610', {
-      permissions: ['public_profile'],
+  async logIn() {
+    const { type, token } = await Exponent.Facebook.logInWithReadPermissionsAsync('719461758217610', {
+      permissions: ['public_profile', 'email', 'user_friends'],
     });
-  if (type === 'success') {
-    // Get the user's name using Facebook's Graph API
-    const response = await fetch(
-      `https://graph.facebook.com/me?access_token=${token}`);
-    //instead of alert, go to home screen
-    Alert.alert(
-      'Logged in!',
-      `Hi ${(await response.json()).name}!`,
-    );
+    
+    if (type === 'success') {
+      // Get the user's name using Facebook's Graph API
+      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,about,picture`);        
+      const responseJSON = JSON.stringify(await response.json());
+    
+      await AsyncStorage.setItem('@EmployeeHelp:user', responseJSON)
+      }
+      try {
+    const value = await AsyncStorage.getItem('@EmployeeHelp:user');
+        if (value !== null){
+    // We have data!!
+        Alert.alert('Logged in!',
+          `Hi ${value}!`);
   }
+} catch (error) {
+  // Error retrieving data
 }
+  }
+
 
   render() {
     return (
       <View style={styles.container}>
-        <ScrollView
-          style={styles.container}
-          contentContainerStyle={styles.contentContainer}>
-
           <View style={styles.welcomeContainer}>
             <Image
               source={require('../assets/images/Peer-Tutoring-Logo.png')}
               style={styles.welcomeImage}
             />
+          <TouchableOpacity onPress={this.logIn}>
+              <Text style={{backgroundColor: 'blue', color: 'white', padding: 20}}>
+                Sign in with Facebook
+              </Text>
+          </TouchableOpacity>
           </View>
+    </View>
+    );
+  }  
 }
 
 
