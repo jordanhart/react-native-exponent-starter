@@ -21,31 +21,46 @@ export default class LogInScreen extends React.Component {
       visible: false,
     },
   }
-
+  constructor(props) {
+    super(props)
+  }
   async logIn() {
+
     const { type, token } = await Exponent.Facebook.logInWithReadPermissionsAsync('719461758217610', {
       permissions: ['public_profile', 'email', 'user_friends'],
     });
-    
+
     if (type === 'success') {
       // Get the user's name using Facebook's Graph API
-      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,about,picture`);        
+      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,about,picture`);
       const responseJSON = JSON.stringify(await response.json());
-    
-      await AsyncStorage.setItem('@EmployeeHelp:user', responseJSON)
+
+      await AsyncStorage.setItem('@EmployeeHelp:user', responseJSON);
+      Alert.alert('Logged in!',
+                 `Hi ${this.props}!`);
+
+       this.props.rerender(responseJSON);
       }
-      try {
-    const value = await AsyncStorage.getItem('@EmployeeHelp:user');
-        if (value !== null){
-    // We have data!!
-        Alert.alert('Logged in!',
-          `Hi ${value}!`);
-  }
-} catch (error) {
-  // Error retrieving data
-}
+//       try {
+//     const value = await AsyncStorage.getItem('@EmployeeHelp:user');
+//         if (value !== null){
+//     // We have data!!
+//         Alert.alert('Logged in!',
+//           `Hi ${value}!`);
+//   }
+// } catch (error) {
+//   // Error retrieving data
+// }
   }
 
+  logMeIn() {
+    this.logIn().then(user => {
+      Alert.alert('props!',
+        `Hi ${this.props}!`,
+        `User: ${user}`);
+      this.props.rerender(user);
+    })
+  }
 
   render() {
     return (
@@ -55,7 +70,7 @@ export default class LogInScreen extends React.Component {
               source={require('../assets/images/Peer-Tutoring-Logo.png')}
               style={styles.welcomeImage}
             />
-          <TouchableOpacity onPress={this.logIn}>
+          <TouchableOpacity onPress={this.logIn.bind(this)}>
               <Text style={{backgroundColor: 'blue', color: 'white', padding: 20}}>
                 Sign in with Facebook
               </Text>
@@ -63,7 +78,7 @@ export default class LogInScreen extends React.Component {
           </View>
     </View>
     );
-  }  
+  }
 }
 
 
@@ -152,4 +167,3 @@ const styles = StyleSheet.create({
     color: '#2e78b7',
   },
 });
-

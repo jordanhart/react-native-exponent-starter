@@ -22,54 +22,74 @@ import Colors from '../constants/Colors';
 import registerForPushNotificationsAsync from '../api/registerForPushNotificationsAsync';
 
 export default class RootNavigation extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {}
+  }
   componentDidMount() {
     this._notificationSubscription = this._registerForPushNotifications();
+    this.getLogin().then((json) => {
+      Alert.alert('Did mount!',
+        `Hi ${json}!`);
+      this.state.login = json;
+    }, function(error) {
+      Alert.alert('Error!',
+        `Hi ${error}!`);
+    });
+  }
+
+  rerender(loginJSON) {
+    this.setState({login: loginJSON});
   }
 
   componentWillUnmount() {
     this._notificationSubscription && this._notificationSubscription.remove();
   }
-
+  async getLogin() {
   try {
-    const value = await AsyncStorage.getItem('@EmployeeHelp:user');
-        if (value !== null){
+     const value = await AsyncStorage.getItem('@EmployeeHelp:user');
+     //if (value !== null){
     // We have data!!
-        Alert.alert('Logged in!',
-          `Hi ${value}!`);
-  }
-} catch (error) {
-  // Error retrieving data
-  Alert.alert('Error!',
-          `Hi {error}!`);
+
+    return value;
+//  }
+
 }
-  
+  catch (error) {
+  // Error retrieving data
+ }
+}
   render() {
+    if (this.state.login) {
+    return (
+      <TabNavigation
+        tabBarHeight={56}
+        initialTab="home">
+        <TabNavigationItem
+          id="home"
+          renderIcon={isSelected => this._renderIcon('home', isSelected)}>
+          <StackNavigation initialRoute="home" />
+        </TabNavigationItem>
 
-    // return (
-    //   <TabNavigation
-    //     tabBarHeight={56}
-    //     initialTab="home">
-    //     <TabNavigationItem
-    //       id="home"
-    //       renderIcon={isSelected => this._renderIcon('home', isSelected)}>
-    //       <StackNavigation initialRoute="home" />
-    //     </TabNavigationItem>
+        <TabNavigationItem
+          id="links"
+          renderIcon={isSelected => this._renderIcon('book', isSelected)}>
+          <StackNavigation initialRoute="links" />
+        </TabNavigationItem>
 
-    //     <TabNavigationItem
-    //       id="links"
-    //       renderIcon={isSelected => this._renderIcon('book', isSelected)}>
-    //       <StackNavigation initialRoute="links" />
-    //     </TabNavigationItem>
-
-    //     <TabNavigationItem
-    //       id="settings"
-    //       renderIcon={isSelected => this._renderIcon('cog', isSelected)}>
-    //       <StackNavigation initialRoute="settings" />
-    //     </TabNavigationItem>
-    //   </TabNavigation>
-    // );
-       return (<LogInScreen/>);
+        <TabNavigationItem
+          id="settings"
+          renderIcon={isSelected => this._renderIcon('cog', isSelected)}>
+          <StackNavigation initialRoute="settings" />
+        </TabNavigationItem>
+      </TabNavigation>
+    );
   }
+  else {
+        return (<LogInScreen rerender={this.rerender.bind(this)}/>);
+   }
+}
 
   _renderIcon(name, isSelected) {
     return (
